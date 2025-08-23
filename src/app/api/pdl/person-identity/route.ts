@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
     const data = await companyEnrichmentAPI(body);
     return NextResponse.json(data);
   } catch (error) {
+    console.error('Person Identity error:', error);
     return NextResponse.json(
       { error: 'Internal Server Error' }, 
       { status: 400 }

@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
     const data = await ipEnrichmentAPI(ip);
     return NextResponse.json(data);
   } catch (error) {
+    console.error('IP Enrichment error:', error);
     return NextResponse.json(
       { error: 'Internal Server Error' }, 
       { status: 400 }

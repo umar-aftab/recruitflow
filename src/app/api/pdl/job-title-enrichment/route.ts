@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
     const data = await jobTitleEnrichmentAPI(jobTitle);
     return NextResponse.json(data);
   } catch (error) {
+    console.error('Job Title error:', error);
     return NextResponse.json(
       { error: 'Internal Server Error' }, 
       { status: 400 }

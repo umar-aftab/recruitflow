@@ -17,8 +17,9 @@ export function usePDL() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       return data;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+        console.error('Person search error:', err);
+      setError('Person search error:');
       throw err;
     } finally {
       setLoading(false);
@@ -38,8 +39,9 @@ export function usePDL() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       return data;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+        console.error('Person Enrichment error:', err);
+      setError('Person Enrichment error');
       throw err;
     } finally {
       setLoading(false);
@@ -60,7 +62,8 @@ export function usePDL() {
       if (!response.ok) throw new Error(data.error);
       return data;
     } catch (err: any) {
-      setError(err.message);
+        console.error('Company Search error:', err);
+      setError('Company Search error');
       throw err;
     } finally {
       setLoading(false);
@@ -80,8 +83,9 @@ export function usePDL() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       return data;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+         console.error('Company Enrichment error:', err);
+      setError('Company Enrichment error:');
       throw err;
     } finally {
       setLoading(false);
@@ -101,8 +105,9 @@ export function usePDL() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       return data;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+        console.error('Person Identify error:', err);
+      setError('Person Identify error:');
       throw err;
     } finally {
       setLoading(false);

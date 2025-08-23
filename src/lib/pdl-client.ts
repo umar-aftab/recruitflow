@@ -12,7 +12,7 @@ const commonHeaders: Record<string, string> = {
 };
 
 // Types
-export interface PdlResponse<T = any> {
+export interface PdlResponse<T = unknown> {
   status: number;
   data: T;
   likelihood?: number;
@@ -48,6 +48,29 @@ export interface CompanySearchParams {
   limit?: number;
 }
 
+// ---- local helper types to avoid `any` ----
+type PersonSearchBody = {
+  sql: string;
+  size: number;
+  titlecase?: boolean;
+  scroll_token?: string;
+};
+
+type CompanySearchBody = {
+  sql: string;
+  size: number;
+  scroll_token?: string;
+};
+
+type PersonIdentifyBody = {
+  ip?: string;
+  cookie?: string;
+  email?: string;
+  phone?: string;
+};
+
+type BulkPersonEnrichItem = { status: number; data?: unknown; error?: unknown };
+
 // ==========================================
 // API 1: PERSON ENRICHMENT API
 // ==========================================
@@ -59,9 +82,9 @@ export async function personEnrichmentAPI(params: {
   company?: string;
 }) {
   console.log('🔍 Calling Person Enrichment API...');
-  
+
   const url = new URL(`${BASE_URL}/person/enrich`);
-  
+
   // Add parameters based on what's provided
   if (params.linkedin) url.searchParams.set('profile', params.linkedin);
   if (params.email) url.searchParams.set('email', params.email);
@@ -70,20 +93,20 @@ export async function personEnrichmentAPI(params: {
     url.searchParams.set('name', params.name);
     url.searchParams.set('company', params.company);
   }
-  
+
   try {
     const res = await fetch(url.toString(), {
       method: 'GET',
       headers: commonHeaders,
       cache: 'no-store',
     });
-    
+
     const json = await res.json();
-    
+
     if (!res.ok) {
-      throw new Error(json?.error || `Person enrichment failed: ${res.status}`);
+      throw new Error((json as { error?: string })?.error || `Person enrichment failed: ${res.status}`);
     }
-    
+
     return json as PdlResponse;
   } catch (error) {
     console.error('❌ Person Enrichment API Error:', error);
@@ -96,28 +119,28 @@ export async function personEnrichmentAPI(params: {
 // ==========================================
 export async function personSearchAPI(params: PersonSearchParams) {
   console.log('🔍 Calling Person Search API...');
-  
-  const { 
+
+  const {
     sql,
-    role, 
-    level, 
-    country, 
-    region, 
-    locality, 
+    role,
+    level,
+    country,
+    region,
+    locality,
     companies,
     skills,
     mustHavePhone,
     mustHaveEmail,
     size = 10,
-    scroll_token 
+    scroll_token
   } = params;
 
   let finalSql = sql;
-  
+
   // Build SQL if not provided
   if (!sql) {
     const parts: string[] = [];
-    
+
     if (country) parts.push(`location_country='${escapeSql(country)}'`);
     if (region) parts.push(`location_region='${escapeSql(region)}'`);
     if (locality) parts.push(`location_locality='${escapeSql(locality)}'`);
@@ -125,12 +148,12 @@ export async function personSearchAPI(params: PersonSearchParams) {
     if (level) parts.push(`job_title_levels='${escapeSql(level)}'`);
     if (mustHavePhone) parts.push(`EXISTS phone_numbers`);
     if (mustHaveEmail) parts.push(`EXISTS emails`);
-    
+
     if (skills && skills.length > 0) {
       const skillsCondition = skills.map(s => `skills='${escapeSql(s)}'`).join(' OR ');
       parts.push(`(${skillsCondition})`);
     }
-    
+
     if (companies && companies.length > 0) {
       const companiesCondition = companies.map(c => `job_company_name='${escapeSql(c)}'`).join(' OR ');
       parts.push(`(${companiesCondition})`);
@@ -140,12 +163,12 @@ export async function personSearchAPI(params: PersonSearchParams) {
     finalSql = `SELECT * FROM person ${where}`;
   }
 
-  const body: any = { 
-    sql: finalSql, 
-    size: clampSize(size), 
-    titlecase: true 
+  const body: PersonSearchBody = {
+    sql: finalSql!,
+    size: clampSize(size),
+    titlecase: true
   };
-  
+
   if (scroll_token) body.scroll_token = scroll_token;
 
   try {
@@ -157,13 +180,13 @@ export async function personSearchAPI(params: PersonSearchParams) {
     });
 
     const json = await res.json();
-    
+
     if (!res.ok) {
-      throw new Error(json?.error || `Person search failed: ${res.status}`);
+      throw new Error((json as { error?: string })?.error || `Person search failed: ${res.status}`);
     }
-    
-    console.log(`✅ Found ${json.data?.length || 0} candidates`);
-    return json as PdlResponse<any[]>;
+
+    console.log(`✅ Found ${(json as { data?: unknown[] })?.data?.length || 0} candidates`);
+    return json as PdlResponse<unknown[]>;
   } catch (error) {
     console.error('❌ Person Search API Error:', error);
     throw error;
@@ -180,14 +203,14 @@ export async function personIdentifyAPI(params: {
   phone?: string;
 }) {
   console.log('🔍 Calling Person Identify API...');
-  
-  const body: any = {};
-  
+
+  const body: PersonIdentifyBody = {};
+
   if (params.ip) body.ip = params.ip;
   if (params.cookie) body.cookie = params.cookie;
   if (params.email) body.email = params.email;
   if (params.phone) body.phone = params.phone;
-  
+
   try {
     const res = await fetch(`${BASE_URL}/person/identify`, {
       method: 'POST',
@@ -197,11 +220,11 @@ export async function personIdentifyAPI(params: {
     });
 
     const json = await res.json();
-    
+
     if (!res.ok) {
-      throw new Error(json?.error || `Person identify failed: ${res.status}`);
+      throw new Error((json as { error?: string })?.error || `Person identify failed: ${res.status}`);
     }
-    
+
     return json as PdlResponse;
   } catch (error) {
     console.error('❌ Person Identify API Error:', error);
@@ -219,28 +242,28 @@ export async function companyEnrichmentAPI(params: {
   linkedin?: string;
 }) {
   console.log('🔍 Calling Company Enrichment API...');
-  
+
   const url = new URL(`${BASE_URL}/company/enrich`);
-  
+
   // Add parameters based on what's provided
   if (params.domain) url.searchParams.set('website', params.domain);
   if (params.name) url.searchParams.set('name', params.name);
   if (params.ticker) url.searchParams.set('ticker', params.ticker);
   if (params.linkedin) url.searchParams.set('profile', params.linkedin);
-  
+
   try {
     const res = await fetch(url.toString(), {
       method: 'GET',
       headers: commonHeaders,
       cache: 'no-store',
     });
-    
+
     const json = await res.json();
-    
+
     if (!res.ok) {
-      throw new Error(json?.error || `Company enrichment failed: ${res.status}`);
+      throw new Error((json as { error?: string })?.error || `Company enrichment failed: ${res.status}`);
     }
-    
+
     return json as PdlResponse;
   } catch (error) {
     console.error('❌ Company Enrichment API Error:', error);
@@ -253,8 +276,8 @@ export async function companyEnrichmentAPI(params: {
 // ==========================================
 export async function companySearchAPI(params: CompanySearchParams) {
   console.log('🔍 Calling Company Search API...');
-  
-  const { 
+
+  const {
     sql,
     name,
     website,
@@ -263,15 +286,15 @@ export async function companySearchAPI(params: CompanySearchParams) {
     size,
     founded,
     limit = 10,
-    scroll_token 
+    scroll_token
   } = params;
 
   let finalSql = sql;
-  
+
   // Build SQL if not provided
   if (!sql) {
     const parts: string[] = [];
-    
+
     if (name) parts.push(`name='${escapeSql(name)}'`);
     if (website) parts.push(`website='${escapeSql(website)}'`);
     if (industry) parts.push(`industry='${escapeSql(industry)}'`);
@@ -283,11 +306,11 @@ export async function companySearchAPI(params: CompanySearchParams) {
     finalSql = `SELECT * FROM company ${where}`;
   }
 
-  const body: any = { 
-    sql: finalSql, 
+  const body: CompanySearchBody = {
+    sql: finalSql!,
     size: clampSize(limit),
   };
-  
+
   if (scroll_token) body.scroll_token = scroll_token;
 
   try {
@@ -299,13 +322,13 @@ export async function companySearchAPI(params: CompanySearchParams) {
     });
 
     const json = await res.json();
-    
+
     if (!res.ok) {
-      throw new Error(json?.error || `Company search failed: ${res.status}`);
+      throw new Error((json as { error?: string })?.error || `Company search failed: ${res.status}`);
     }
-    
-    console.log(`✅ Found ${json.data?.length || 0} companies`);
-    return json as PdlResponse<any[]>;
+
+    console.log(`✅ Found ${(json as { data?: unknown[] })?.data?.length || 0} companies`);
+    return json as PdlResponse<unknown[]>;
   } catch (error) {
     console.error('❌ Company Search API Error:', error);
     throw error;
@@ -317,23 +340,23 @@ export async function companySearchAPI(params: CompanySearchParams) {
 // ==========================================
 export async function ipEnrichmentAPI(ip: string) {
   console.log('🔍 Calling IP Enrichment API...');
-  
+
   const url = new URL(`${BASE_URL}/ip/enrich`);
   url.searchParams.set('ip', ip);
-  
+
   try {
     const res = await fetch(url.toString(), {
       method: 'GET',
       headers: commonHeaders,
       cache: 'no-store',
     });
-    
+
     const json = await res.json();
-    
+
     if (!res.ok) {
-      throw new Error(json?.error || `IP enrichment failed: ${res.status}`);
+      throw new Error((json as { error?: string })?.error || `IP enrichment failed: ${res.status}`);
     }
-    
+
     return json as PdlResponse;
   } catch (error) {
     console.error('❌ IP Enrichment API Error:', error);
@@ -346,23 +369,23 @@ export async function ipEnrichmentAPI(ip: string) {
 // ==========================================
 export async function jobTitleEnrichmentAPI(jobTitle: string) {
   console.log('🔍 Calling Job Title Enrichment API...');
-  
+
   const url = new URL(`${BASE_URL}/job_title/enrich`);
   url.searchParams.set('job_title', jobTitle);
-  
+
   try {
     const res = await fetch(url.toString(), {
       method: 'GET',
       headers: commonHeaders,
       cache: 'no-store',
     });
-    
+
     const json = await res.json();
-    
+
     if (!res.ok) {
-      throw new Error(json?.error || `Job title enrichment failed: ${res.status}`);
+      throw new Error((json as { error?: string })?.error || `Job title enrichment failed: ${res.status}`);
     }
-    
+
     return json as PdlResponse;
   } catch (error) {
     console.error('❌ Job Title Enrichment API Error:', error);
@@ -379,7 +402,7 @@ export async function bulkPersonEnrichment(requests: Array<{
   phone?: string;
 }>) {
   console.log(`🔍 Bulk enriching ${requests.length} persons...`);
-  
+
   const payload = {
     requests: requests.slice(0, 100).map(req => ({
       params: {
@@ -389,21 +412,21 @@ export async function bulkPersonEnrichment(requests: Array<{
       }
     }))
   };
-  
+
   try {
     const res = await fetch(`${BASE_URL}/person/enrich/bulk`, {
       method: 'POST',
       headers: commonHeaders,
       body: JSON.stringify(payload),
     });
-    
+
     const json = await res.json();
-    
+
     if (!res.ok) {
-      throw new Error(json?.error || 'Bulk enrichment failed');
+      throw new Error((json as { error?: string })?.error || 'Bulk enrichment failed');
     }
-    
-    return json as Array<{ status: number; data?: any; error?: any }>;
+
+    return json as Array<BulkPersonEnrichItem>;
   } catch (error) {
     console.error('❌ Bulk Person Enrichment Error:', error);
     throw error;
@@ -428,7 +451,7 @@ function clampSize(n?: number): number {
 export async function checkRemainingCredits(response: Response) {
   const remainingCredits = response.headers.get('X-RateLimit-Remaining');
   const creditLimit = response.headers.get('X-RateLimit-Limit');
-  
+
   if (remainingCredits && creditLimit) {
     console.log(`📊 Credits: ${remainingCredits}/${creditLimit} remaining`);
     return {
@@ -436,6 +459,6 @@ export async function checkRemainingCredits(response: Response) {
       limit: parseInt(creditLimit),
     };
   }
-  
+
   return null;
 }
