@@ -18,10 +18,10 @@ export async function POST(req: NextRequest) {
     };
     
     return NextResponse.json(searchResult);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Company search error:', error);
     return NextResponse.json(
-      { error: error.message }, 
+      { error: 'Company Search Error' }, 
       { status: 400 }
     );
   }

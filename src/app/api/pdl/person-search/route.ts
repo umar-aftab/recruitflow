@@ -18,10 +18,10 @@ export async function POST(req: NextRequest) {
     };
     
     return NextResponse.json(searchResult);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Person search error:', error);
     return NextResponse.json(
-      { error: error.message }, 
+      { error: 'Person Search Error' }, 
       { status: 400 }
     );
   }

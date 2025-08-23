@@ -22,10 +22,10 @@ export async function POST(req: NextRequest) {
       candidate: null,
       likelihood: pdlResponse.likelihood || 0 
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Person enrichment error:', error);
     return NextResponse.json(
-      { error: error.message }, 
+      { error: 'Person Enrichment Error' }, 
       { status: 400 }
     );
   }
