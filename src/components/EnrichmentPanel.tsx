@@ -3,9 +3,18 @@
 import { useState } from 'react';
 import { UserPlus, Building2, Search } from 'lucide-react';
 
+interface PersonEnrichData {
+  linkedin?: string;
+  email?: string;
+}
+
+interface CompanyEnrichData {
+  domain?: string;
+}
+
 interface EnrichmentPanelProps {
-  onEnrichPerson: (data: any) => void;
-  onEnrichCompany: (data: any) => void;
+  onEnrichPerson: (data: PersonEnrichData) => void;
+  onEnrichCompany: (data: CompanyEnrichData) => void;
   loading: boolean;
 }
 
@@ -28,7 +37,7 @@ export default function EnrichmentPanel({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 lg:p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
         Quick Enrichment
       </h3>
@@ -36,24 +45,24 @@ export default function EnrichmentPanel({
       <div className="flex gap-2 p-1 bg-gray-100 rounded-lg mb-4">
         <button
           onClick={() => setEnrichType('person')}
-          className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm transition ${
+          className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-xs transition ${
             enrichType === 'person' 
               ? 'bg-white text-purple-600 shadow-sm' 
               : 'text-gray-600'
           }`}
         >
-          <UserPlus className="w-4 h-4" />
+          <UserPlus className="w-3.5 h-3.5" />
           Person
         </button>
         <button
           onClick={() => setEnrichType('company')}
-          className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm transition ${
+          className={`flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-xs transition ${
             enrichType === 'company' 
               ? 'bg-white text-purple-600 shadow-sm' 
               : 'text-gray-600'
           }`}
         >
-          <Building2 className="w-4 h-4" />
+          <Building2 className="w-3.5 h-3.5" />
           Company
         </button>
       </div>
@@ -65,14 +74,14 @@ export default function EnrichmentPanel({
             value={linkedinUrl}
             onChange={(e) => setLinkedinUrl(e.target.value)}
             placeholder="LinkedIn URL (e.g., linkedin.com/in/johndoe)"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
           />
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email (optional)"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
           />
         </div>
       ) : (
@@ -81,7 +90,7 @@ export default function EnrichmentPanel({
           value={domain}
           onChange={(e) => setDomain(e.target.value)}
           placeholder="Company domain (e.g., google.com)"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+          className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
         />
       )}
 

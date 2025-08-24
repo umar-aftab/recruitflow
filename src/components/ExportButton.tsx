@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, FileSpreadsheet, FileText } from 'lucide-react';
+import { FileSpreadsheet, FileText } from 'lucide-react';
 import { Candidate, Company } from '@/lib/types';
 
 interface ExportButtonProps {

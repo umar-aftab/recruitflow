@@ -1,9 +1,10 @@
 'use client';
 
 import { ExternalLink, Mail, Phone, MapPin, Briefcase } from 'lucide-react';
+import { Candidate } from '@/lib/types';
 
 interface CandidateListProps {
-  candidates: any[];
+  candidates: Candidate[];
   loading: boolean;
 }
 

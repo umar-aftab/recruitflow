@@ -16,7 +16,7 @@ type PdlPersonLike = {
   github_url?: string;
   emails?: string[];
   phone_numbers?: string[];
-  experience?: unknown[];
+  experience?: string[];
   skills?: string[];
   location_locality?: string;
   location_region?: string;

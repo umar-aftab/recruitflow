@@ -9,6 +9,23 @@ import EnrichmentPanel from '@/components/EnrichmentPanel';
 import Statistics from '@/components/Statistics';
 import { Users, Building2, Sparkles, Database } from 'lucide-react';
 
+// Define proper types for the parameters
+interface CompanySearchParams {
+  industry?: string;
+  size?: string;
+  location?: string;
+  limit?: number;
+}
+
+interface PersonEnrichParams {
+  linkedin?: string;
+  email?: string;
+}
+
+interface CompanyEnrichParams {
+  domain?: string;
+}
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'candidates' | 'companies'>('candidates');
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -59,15 +76,15 @@ export default function Home() {
       };
       setStats(newStats);
       localStorage.setItem('recruitflow_stats', JSON.stringify(newStats));
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError("Error occurred during search");
       console.error('Person search error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCompanySearch = async (filters: any) => {
+  const handleCompanySearch = async (filters: CompanySearchParams) => {
     setLoading(true);
     setError(null);
     setActiveTab('companies');
@@ -86,15 +103,15 @@ export default function Home() {
       }
 
       setCompanies(data.companies || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError("Error occurred during company search");
       console.error('Company search error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePersonEnrichment = async (params: any) => {
+  const handlePersonEnrichment = async (params: PersonEnrichParams) => {
     setLoading(true);
     setError(null);
 
@@ -116,15 +133,15 @@ export default function Home() {
         setCandidates([data.candidate, ...candidates]);
         setActiveTab('candidates');
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError("Error occurred during enrichment");
       console.error('Person enrichment error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCompanyEnrichment = async (params: any) => {
+  const handleCompanyEnrichment = async (params: CompanyEnrichParams) => {
     setLoading(true);
     setError(null);
 
@@ -146,8 +163,8 @@ export default function Home() {
         setCompanies([data.company, ...companies]);
         setActiveTab('companies');
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError("Error occurred during company enrichment");
       console.error('Company enrichment error:', err);
     } finally {
       setLoading(false);
@@ -168,7 +185,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl">
@@ -187,14 +204,13 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="mx-auto w-full px-4 sm:px-6 lg:px-8 py-8
-                 max-w-screen-xl 2xl:max-w-[1600px] 3xl:max-w-[1920px]">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Left Sidebar - Search & Enrichment */}
-          <div className="md:col-span-1 space-y-6">
+      {/* Main Content - Fixed Layout */}
+      <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+          {/* Left Sidebar - Fixed width on large screens */}
+          <div className="xl:col-span-3 space-y-6">
             {/* Search Form */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 lg:p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Discovery Filters</h2>
               <EnhancedSearchForm 
                 onPersonSearch={handlePersonSearch}
@@ -212,7 +228,7 @@ export default function Home() {
           </div>
 
           {/* Right Content - Results */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="xl:col-span-9 space-y-6">
             {/* Statistics */}
             <Statistics {...stats} />
 

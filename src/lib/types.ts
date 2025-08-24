@@ -9,7 +9,7 @@ export interface Candidate {
   github_url?: string;
   emails?: string[];
   phone_numbers?: string[];
-  experience?: any[];
+  experience?: string[];
   skills?: string[];
 }
 
